@@ -192,7 +192,7 @@ int main(void)
 	/* Channel and Cont */
 	printf("\nInsira o numero de canais: ");
     scanf("%d", &numCanais);
-
+int aux= numCanais;
 	printf("\nInsira o Tempo de simulação (em ms): ");
     scanf("%lf", &time_simulation);
 
@@ -204,6 +204,7 @@ int main(void)
     while (ic < time_simulation)
     {
 		printf("numero de canais: %d", numCanais);
+
 		printf ("State : %d\n", busy);
 
 		if (numCanais == 0){
@@ -228,6 +229,7 @@ int main(void)
 				}
 				lista_eventos = charge(lista_eventos, PARTIDA, ic + d);*/
 				//if(busy==FALSE)
+				if(aux>numCanais)
 				numCanais++;
 				printf ("Partida em d = %lf e numero de canais = %d\n", d, numCanais);
 			}
@@ -242,7 +244,7 @@ int main(void)
 						lista_eventos = remover(lista_eventos);
 					}
 					lista_eventos = charge(lista_eventos, CHEGADA, ic);*/
-					printf ("Chegada em ic = %lf e numero de canais = %d\n", ic, numCanais);
+          printf ("Chegada em ic = %lf e numero de canais = %d\n", ic, numCanais);
 					numCanais--;
 				}
 				if(busy==TRUE){
@@ -282,5 +284,5 @@ int main(void)
 
 	/* Cria gráfico */
 	//plotResults(EixoX,histogramaY,time_simulation);
-	return 0; 
+	return 0;
 }
