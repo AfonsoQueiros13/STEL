@@ -8,7 +8,7 @@
 #define FALSE 0
 #define TRUE 1
 
-double u = 0; 
+double u = 0;
 
 // Defini��o da estrutura da lista
 typedef struct{
@@ -282,5 +282,5 @@ int main(void)
 
 	/* Cria gráfico */
 	//plotResults(EixoX,histogramaY,time_simulation);
-	return 0;
+	return 0; 
 }
