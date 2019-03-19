@@ -153,7 +153,7 @@ int main(void)
 		printf("numero de canais: %d", numCanais);
 		printf ("State : %d\n", busy);
 		c=getC(lambda);
-		ic+=c;
+		ic+=c; //contador
 		lista_eventos = adicionar(lista_eventos, CHEGADA, ic);
 		if(numCanais>0)
 			{
