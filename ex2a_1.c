@@ -150,36 +150,63 @@ int main(void)
 
   while (ic < time_simulation)
     {
+		cont++; //contagem de eventos
 		printf("numero de canais: %d", numCanais);
 		printf ("State : %d\n", busy);
-		c=getC(lambda);
+		c=getC(lambda); // funcao que calcula c(chegada de uma nova chamada)
 		ic+=c; //contador
-		lista_eventos = adicionar(lista_eventos, CHEGADA, ic);
-		if(numCanais>0)
-			{
-				cont++;
-				numCanais--;
-				d = getD(dm);
-				id=ic+d;
-				printf("\nid= %lf",id);
-				if(numCanais!=0){
-				lista_eventos = adicionar(lista_eventos, PARTIDA, id);
-				numCanais++;
-			}
+		d = getD(dm); //funcao que calcula d(tempo de partida desde da chegada)
+		id=ic+d;
+
+	/* Adiciona novo evento e apaga anterior */
+		if ( lista_eventos != NULL)
+		{
+			tipo_ev = lista_eventos -> tipo;
+			tempo_ev = lista_eventos -> tempo;
+			lista_eventos = remover(lista_eventos);
+		}
+    lista_eventos = adiciona(lista_eventos, CHEGADA,ic); //geração de uma chegada
+		lista_eventos = adiciona(lista_eventos, PARTIDA,id);   //geração da partida respetiva
+		numCanais--; //canal ocupa-se quando chega uma chamada
+		
+		/*-------------------FIM PROCESSAMENTO CHEGADA----------------*/
+
+		if(lista_eventos->tipo==CHEGADA){ //Ocorreu um evento CHEGADA
+			numCanais--;
+			if ( lista_eventos != NULL)
+		{
+			tipo_ev = lista_eventos -> tipo;
+			tempo_ev = lista_eventos -> tempo;
+			lista_eventos = remover(lista_eventos);
+		}
+    lista_eventos = charge(lista_eventos, CHEGADA,ic); //geração de uma chegada
+		}
+		if (lista_eventos->tipo==PARTIDA) { //Ocorreu um evento PARTIDA
 				if(numCanais==0)
 			{
 				neg++;
+				cont++; //contagem de eventos
+			}
+			else{
+			/* Adiciona novo evento e apaga anterior */
+					if ( lista_eventos != NULL)
+				{
+					tipo_ev = lista_eventos -> tipo;
+					tempo_ev = lista_eventos -> tempo;
+					lista_eventos = remover(lista_eventos);
+				}
+  
+    		lista_eventos = charge(lista_eventos, PARTIDA,id);
+				cont++; //contagem de eventos
+				numCanais++;
+		/*-------------------FIM PROCESSAMENTO PARTIDA----------------*/
 			}
 		}
-	 if ( lista_eventos != NULL)
-			{
-				tipo_ev = lista_eventos -> tipo;
-				tempo_ev = lista_eventos -> tempo;
-				lista_eventos = remover(lista_eventos);
-			}
-}
-	 lista_eventos = charge(lista_eventos, CHEGADA, ic);
+		
 
+		
+}
+	printf("\n\n");
 	imprimir(lista_eventos);
 	printf ("Chamadas negadas: %d\n", neg);
 	printf ("Contagem: %d\n", cont);
