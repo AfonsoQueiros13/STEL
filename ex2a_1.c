@@ -171,7 +171,7 @@ int main(void)
 		
 		/*-------------------FIM PROCESSAMENTO CHEGADA----------------*/
 
-		if(lista_eventos->tipo==CHEGADA){ //Ocorreu um evento CHEGADA
+		if(lista_eventos->tipo==CHEGADA){ //Ocorreu um evento CHEGADA!
 			numCanais--;
 			if ( lista_eventos != NULL)
 		{
@@ -181,7 +181,7 @@ int main(void)
 		}
     lista_eventos = charge(lista_eventos, CHEGADA,ic); //geração de uma chegada
 		}
-		if (lista_eventos->tipo==PARTIDA) { //Ocorreu um evento PARTIDA
+		if (lista_eventos->tipo==PARTIDA) { //Ocorreu um evento PARTIDA!
 				if(numCanais==0)
 			{
 				neg++;
