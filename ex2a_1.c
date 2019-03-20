@@ -45,6 +45,7 @@ int main(void)
 	double ic = 0.0, time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, delta = 0.001, d = 0.0, prob = 0.0;
 	unsigned int i = 0, n = 0, cont = 0, neg = 0;
 	int numCanais = 0;
+	double time=0.0;
 	char busy = FALSE;
 	/*********************************************FIM INICIALIZAÇÕES************************************************/
 	printf("\nNumber of channels: ");
@@ -57,7 +58,7 @@ int main(void)
 	lista_eventos = adicionar(lista_eventos, CHEGADA, 0.0);
 	numCanais--; //um canal fica já ocupado com a chegada de uma chamada
 	cont = 1;
-	while (ic < time_simulation)
+	while (time < time_simulation)
 	{
 		//sleep(1);
 		printf("\nNumber of free channels: %d", numCanais);
@@ -78,6 +79,7 @@ int main(void)
 				lista_eventos = adicionar(lista_eventos, CHEGADA, ic);
 				lista_eventos = adicionar(lista_eventos, PARTIDA,id); //partida do pacote anterior
 				ic += c;					//contador
+				if(numCanais>0)
 				numCanais--;
 				cont++; //contagem de eventos de chegada
 				
@@ -90,11 +92,13 @@ int main(void)
 
 		if (lista_eventos->tipo == PARTIDA)
 		{ //Ocorreu um evento PARTIDA!
+			lista_eventos = (lista *)lista_eventos -> proximo; // next loop verifies next event
 			printf("\nPARTIDA! em %lf (s)", lista_eventos->tempo);
+			if(numCanais<aux)
 			numCanais++;
 			/*-------------------FIM PROCESSAMENTO PARTIDA----------------*/
 		}
-		ic += c;
+		time+=ic;
 	}
 	printf("\n\nLISTA DE EVENTOS\n\n");
 	imprimir(lista_eventos);
