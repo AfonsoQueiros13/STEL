@@ -88,8 +88,16 @@ void imprimir (lista * apontador)
 	{
 		while(apontador != NULL)
 		{
-			printf("Tipo=%d\tTempo=%lf\n", apontador -> tipo, apontador -> tempo);
+            if(apontador->tipo==1){
+			printf("Tipo=PARTIDA  Tempo=%lf\n", apontador -> tempo);
 			apontador = (lista *)apontador -> proximo;
+            }
+            else
+            {
+                printf("Tipo=CHEGADA  Tempo=%lf\n", apontador -> tempo);
+			apontador = (lista *)apontador -> proximo;
+            }
+            
 		}
 	}
 }
