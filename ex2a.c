@@ -30,7 +30,6 @@ double getD(double dm)
 {
 	double d;
 	d = (-dm) * log(getRandom());
-	//printf("\nValor de C: %f ", c);
 	return d;
 }
 /*********************************************MAIN************************************************/
@@ -57,26 +56,31 @@ int main(void)
 
 	/*********************Inicio de  chegada de chamadas a 0.0 segundos********************************************/
 	lista_eventos = adicionar(lista_eventos, CHEGADA, 0.0);
+	
 	/********************************************CICLO WHILE*********************************************/
 	while (time < time_simulation)
 	{
 		//sleep(1);
 		printf("\nNumber of free channels: %d", numCanais);
+		printf("\nBUSY= %d\n",busy);
+		printf("\nNEG= %d\n",neg);
 		/*-------------------GERAR CHEGADA DO PROX PACOTE E PARTIDA DO ANTERIOR----------------*/
 		if (lista_eventos->tipo == CHEGADA)
 		{ //Ocorreu um evento CHEGADA!
 			printf("\nCHEGADA! em %lf (s)", lista_eventos->tempo);
 			prim_vez++;
 			c = getC(lambda); // funcao que calcula c(chegada de uma nova chamada)	
+			if(busy==FALSE){
 			d = getD(dm);			//funcao que calcula d(tempo de partida desde da chegada)
-			id = ic + d;      //como id depende de ic e queremos a partida do anterior este calculo e feito antes de ic
-		    ic += c;
+			id = ic + d;     //como id depende de ic e queremos a partida do anterior este calculo e feito antes de ic
+			}
+			ic += c;
 			printf("\nic= %lf", ic);
 	    	printf("\nid= %lf", id);
 			lista_eventos = adicionar(lista_eventos, CHEGADA, ic);
 			if(busy==FALSE){
 				if(prim_vez==1)
-					lista_eventos = adicionar(lista_eventos, PARTIDA, d); //partida do pacote anterior
+					lista_eventos = adicionar(lista_eventos, PARTIDA, d); //partida do pacote q chegou em 0.0s
 				else
 					lista_eventos = adicionar(lista_eventos, PARTIDA, id); //partida do pacote anterior
 			}
