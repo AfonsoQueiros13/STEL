@@ -70,9 +70,7 @@ int main(void)
 				printf("\nqueue = %d",queue);
             } 
 
-			c = getC(lambda);
-            lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
-            cont++;
+			
 
             if (numCanais > 0 )
             {
@@ -81,6 +79,9 @@ int main(void)
                 lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
 
             }
+			c = getC(lambda);
+            lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
+            cont++;
 			
 			
 		} 
@@ -88,16 +89,18 @@ int main(void)
 		if (lista_eventos->tipo == PARTIDA) 
 		{
             // liberta Canal
-			if(numCanais < aux) 
+			if(numCanais < aux && queue == 0) 
 			{
 				numCanais++;
+				
 			}	
 				
 			if (queue > 0) 
 			{
 				d = getD(dm);
                 lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
-	 			queue--;
+				queue--;
+	 			
 			}
 
 			
