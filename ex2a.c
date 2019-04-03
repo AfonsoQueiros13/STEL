@@ -137,12 +137,31 @@ int main(void)
 {
 	/*********************************************INICIALIZAÇÕES************************************************/
 
+<<<<<<< HEAD
 	lista *lista_eventos = NULL;
 	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0;
+=======
+<<<<<<< HEAD
+	lista *lista_eventos = NULL;
+	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0;
+=======
+	lista *lista_eventos;
+	int tipo_ev;
+	double tempo_ev;
+	double ic = 0.0, time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, delta = 0.001, d = 0.0, prob = 0.0;
+>>>>>>> eb1ca9497cf68b06f4659e7afe62ec34308e2005
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
 	unsigned int i = 0, n = 0, cont = 0, neg = 0;
 	int numCanais = 0;
 	double time_init = 0.0;
 	int aux = 0.0;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+	double id = 0.0;
+>>>>>>> eb1ca9497cf68b06f4659e7afe62ec34308e2005
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
 	char busy = FALSE;
 	/*********************************************FIM INICIALIZAÇÕES************************************************/
 	printf("\nNumber of channels: ");
@@ -156,7 +175,17 @@ int main(void)
 	while (time_init < time_simulation)
 	{
 		/* carrega proximo evento */
+<<<<<<< HEAD
 		time_init = lista_eventos->tempo;
+=======
+<<<<<<< HEAD
+		time_init = lista_eventos->tempo;
+=======
+		lista_eventos = (lista*)lista_eventos->proximo;
+		time_init = lista_eventos->tempo;
+
+>>>>>>> eb1ca9497cf68b06f4659e7afe62ec34308e2005
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
         printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
 
         if (lista_eventos->tipo == CHEGADA) 
@@ -174,11 +203,23 @@ int main(void)
                 if (busy == FALSE) 
                 {
                     d = getD(dm);
+<<<<<<< HEAD
                     lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+=======
+<<<<<<< HEAD
+                    lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+=======
+                    adicionar(lista_eventos, PARTIDA, time_init + d);
+>>>>>>> eb1ca9497cf68b06f4659e7afe62ec34308e2005
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
                 }  
             }
 
 			c = getC(lambda);
+<<<<<<< HEAD
+            lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
+=======
+<<<<<<< HEAD
             lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
             cont++;
 			
@@ -187,6 +228,21 @@ int main(void)
 		if (lista_eventos->tipo == PARTIDA) 
 		{
             // liberta Canal
+=======
+            adicionar(lista_eventos, CHEGADA, time_init + c);
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
+            cont++;
+			
+		} 
+		
+		if (lista_eventos->tipo == PARTIDA) 
+		{
+<<<<<<< HEAD
+            // liberta Canal
+=======
+            /* liberta Canal */
+>>>>>>> eb1ca9497cf68b06f4659e7afe62ec34308e2005
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
 			if(numCanais < aux) 
 			{
 				numCanais++;
@@ -196,8 +252,16 @@ int main(void)
 
 		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
 			printf("\n\nNão existem pacotes gerados!\n\n");
+<<<<<<< HEAD
 
 		lista_eventos = (lista*)lista_eventos->proximo;
+=======
+<<<<<<< HEAD
+
+		lista_eventos = (lista*)lista_eventos->proximo;
+=======
+>>>>>>> eb1ca9497cf68b06f4659e7afe62ec34308e2005
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
 	}
 
 	printf("\nChamadas negadas: %d\n", neg);

@@ -61,7 +61,10 @@ int main(void)
 
         if (lista_eventos->tipo == CHEGADA) 
 		{
+<<<<<<< HEAD
 			
+=======
+>>>>>>> ff893b0300cf21c2127f678bc8d031516060dab4
 			if (numCanais == 0) 
             {
                 queue++;
