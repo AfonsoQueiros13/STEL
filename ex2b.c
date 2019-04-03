@@ -91,7 +91,7 @@ int main(void)
             // liberta Canal
 			if(numCanais < aux && queue == 0) 
 			{
-				numCanais++;
+				numCanais++; // so quando queue=0!
 				
 			}	
 				
