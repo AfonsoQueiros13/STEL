@@ -139,11 +139,11 @@ int main(void)
 
 	lista *lista_eventos = NULL;
 	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0;
-	unsigned int i = 0, n = 0, cont = 0, neg = 0;
+	unsigned int i = 0, n = 0, cont = 0, queue = 0, est_queue = 0;
 	int numCanais = 0;
 	double time_init = 0.0;
 	int aux = 0.0;
-	char busy = FALSE;
+	char busy = FALSE, flag = FALSE;
 	/*********************************************FIM INICIALIZAÇÕES************************************************/
 	printf("\nNumber of channels: ");
 	scanf("%d", &numCanais);
@@ -163,19 +163,19 @@ int main(void)
 		{
 			if (numCanais == 0) 
             {
-                busy = TRUE;
-                neg++;
+                queue++;
+				est_queue++;
             } 
 
             if (numCanais > 0)
             {
                 numCanais--;
 
-                if (busy == FALSE) 
-                {
-                    d = getD(dm);
-                    lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
-                }  
+				d = getD(dm);
+                lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+
+				if (queue > 0)
+					queue--;
             }
 
 			c = getC(lambda);
@@ -190,7 +190,15 @@ int main(void)
 			if(numCanais < aux) 
 			{
 				numCanais++;
-			    busy = FALSE;
+				
+				if (queue > 0 && numCanais < aux) 
+				{
+					d = getD(dm);
+                	lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+
+					queue--;
+
+				}
 			} 
 		} 
 
@@ -200,9 +208,10 @@ int main(void)
 		lista_eventos = (lista*)lista_eventos->proximo;
 	}
 
-	printf("\nChamadas negadas: %d\n", neg);
-	printf("Contagem: %d\n", cont);
-	prob = ((double)neg / (double)cont) * 100.0;
-	printf("Percentagem de bloco: %lf\n", prob);
+	printf("\nChamadas na fila: %d", queue);
+	printf("\nChamadas que entraram na fila: %d",est_queue);
+	printf("\nContagem: %d", cont);
+	prob = ((double)est_queue / (double)cont) * 100.0;
+	printf("\nService level: %lf\n", prob);
 	return 0;
 }
