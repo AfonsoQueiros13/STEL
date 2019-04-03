@@ -3,6 +3,7 @@
 #include <math.h>
 #include <unistd.h>
 #include "struct_eventos.c"
+#include <time.h>
 
 #define CHEGADA 0
 #define PARTIDA 1
@@ -39,11 +40,17 @@ int main(void)
 
 	lista *lista_eventos = NULL;
 	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0;
-	unsigned int i = 0, n = 0, cont = 0, queue = 0, est_queue = 0;
+	unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
 	int numCanais = 0;
 	double time_init = 0.0;
+	double atraso_medio= 0.0;
+	double cont_atraso=0.0;
+	clock_t start_delay, end_delay;
 	int aux = 0.0;
 	char busy = FALSE, flag = FALSE;
+	double start_delays[50000];
+	double end_delays[50000];
+	int i=0,j=0;
 	/*********************************************FIM INICIALIZAÇÕES************************************************/
 	printf("\nNumber of channels: ");
 	scanf("%d", &numCanais);
@@ -64,15 +71,14 @@ int main(void)
 			
 			if (numCanais == 0) 
             {
+				start_delay = clock();
+				start_delays[i]= (double) start_delay;
+				i++;
                 queue++;
 				est_queue++;
-				printf("\nest_queue= %d",est_queue);
-				printf("\nqueue = %d",queue);
             } 
 
-			
-
-            if (numCanais > 0 )
+            if (numCanais > 0)
             {
                 numCanais--;
 				d = getD(dm);
@@ -98,8 +104,13 @@ int main(void)
 			if (queue > 0) 
 			{
 				d = getD(dm);
-                lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
 				queue--;
+                lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+				end_delay= clock();
+				end_delays[j]= (double) end_delay;
+				cont_atraso+=((end_delays[j]-start_delays[j])/ CLOCKS_PER_SEC);
+				j++;
+				printf("\ncont atraso= %lf",cont_atraso);
 	 			
 			}
 
@@ -111,12 +122,15 @@ int main(void)
 			printf("\n\nNão existem pacotes gerados!\n\n");
 
 		lista_eventos = (lista*)lista_eventos->proximo;
+		
 	}
-
+	printf("\n\n\t\t***************RESULTADOS*******************\n");
 	printf("\nChamadas na fila: %d", queue);
 	printf("\nChamadas que entraram na fila: %d",est_queue);
 	printf("\nContagem: %d", cont);
-	prob = ((double)est_queue / (double)cont) * 100.0; //primeiro calculo pedido (prob delay)
-	printf("\nDelay probability: %lf\n", prob);
+	prob = ((double)est_queue / (double) cont) * 100.0; //primeiro calculo pedido (prob delay)
+	printf("\nDelay probability: %lf", prob);
+	atraso_medio= (cont_atraso/cont);
+	printf("\nAtraso medio de todos os pacotes : %lf (s) \n", atraso_medio);
 	return 0;
 }
