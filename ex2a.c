@@ -9,102 +9,105 @@
 #define TRUE 1
 
 // Defini��o da estrutura da lista
-typedef struct{
+typedef struct
+{
 	int tipo;
 	double tempo;
-	struct lista * proximo;
+	struct lista *proximo;
 } lista;
 
 // Fun��o que remove o primeiro elemento da lista
-lista * remover (lista * apontador)
+lista *remover(lista *apontador)
 {
-	lista * lap = (lista *)apontador -> proximo;
+	lista *lap = (lista *)apontador->proximo;
 	free(apontador);
 	return lap;
 }
 
-lista * charge (lista * apontador, int n_tipo, double n_tempo)
+lista *charge(lista *apontador, int n_tipo, double n_tempo)
 {
-	lista * lap = apontador;
-	lista * ap_aux, * ap_next;
-	if(apontador == NULL)
+	lista *lap = apontador;
+	lista *ap_aux, *ap_next;
+	if (apontador == NULL)
 	{
-		apontador = (lista *) malloc(sizeof (lista));
-		apontador -> proximo = NULL;
-		apontador -> tipo = n_tipo;
-		apontador -> tempo = n_tempo;
-		return apontador;
-	}
-    else  {
-        lista * lap = (lista *)apontador -> proximo;
-	    free(apontador);
-	    return lap;
-    }
-}
-
-// Fun��o que adiciona novo elemento � lista, ordenando a mesma por tempo
-lista * adicionar (lista * apontador, int n_tipo, double n_tempo)
-{
-	lista * lap = apontador;
-	lista * ap_aux, * ap_next;
-	if(apontador == NULL)
-	{
-		apontador = (lista *) malloc(sizeof (lista));
-		apontador -> proximo = NULL;
-		apontador -> tipo = n_tipo;
-		apontador -> tempo = n_tempo;
+		apontador = (lista *)malloc(sizeof(lista));
+		apontador->proximo = NULL;
+		apontador->tipo = n_tipo;
+		apontador->tempo = n_tempo;
 		return apontador;
 	}
 	else
 	{
-		if (apontador->tempo > n_tempo) {
-	        ap_aux = (lista *) malloc(sizeof (lista));
-	        ap_aux -> tipo = n_tipo;
-            ap_aux -> tempo = n_tempo;
-            ap_aux -> proximo = (struct lista *) apontador;
-            return ap_aux;
-	    }
+		lista *lap = (lista *)apontador->proximo;
+		free(apontador);
+		return lap;
+	}
+}
 
-		ap_next = (lista *)apontador -> proximo;
-		while(apontador != NULL)
+// Fun��o que adiciona novo elemento � lista, ordenando a mesma por tempo
+lista *adicionar(lista *apontador, int n_tipo, double n_tempo)
+{
+	lista *lap = apontador;
+	lista *ap_aux, *ap_next;
+	if (apontador == NULL)
+	{
+		apontador = (lista *)malloc(sizeof(lista));
+		apontador->proximo = NULL;
+		apontador->tipo = n_tipo;
+		apontador->tempo = n_tempo;
+		return apontador;
+	}
+	else
+	{
+		if (apontador->tempo > n_tempo)
 		{
-			if((ap_next == NULL) || ((ap_next -> tempo) > n_tempo))
-				break;
-			apontador = (lista *)apontador -> proximo;
-			ap_next = (lista *)apontador -> proximo;
+			ap_aux = (lista *)malloc(sizeof(lista));
+			ap_aux->tipo = n_tipo;
+			ap_aux->tempo = n_tempo;
+			ap_aux->proximo = (struct lista *)apontador;
+			return ap_aux;
 		}
-		ap_aux = (lista *)apontador -> proximo;
-		apontador -> proximo = (struct lista *) malloc(sizeof (lista));
-		apontador = (lista *)apontador -> proximo;
-		if(ap_aux != NULL)
-			apontador -> proximo = (struct lista *)ap_aux;
+
+		ap_next = (lista *)apontador->proximo;
+		while (apontador != NULL)
+		{
+			if ((ap_next == NULL) || ((ap_next->tempo) > n_tempo))
+				break;
+			apontador = (lista *)apontador->proximo;
+			ap_next = (lista *)apontador->proximo;
+		}
+		ap_aux = (lista *)apontador->proximo;
+		apontador->proximo = (struct lista *)malloc(sizeof(lista));
+		apontador = (lista *)apontador->proximo;
+		if (ap_aux != NULL)
+			apontador->proximo = (struct lista *)ap_aux;
 		else
-			apontador -> proximo = NULL;
-		apontador -> tipo = n_tipo;
-		apontador -> tempo = n_tempo;
+			apontador->proximo = NULL;
+		apontador->tipo = n_tipo;
+		apontador->tempo = n_tempo;
 		return lap;
 	}
 }
 
 // Fun��o que imprime no ecra todos os elementos da lista
-void imprimir (lista * apontador)
+void imprimir(lista *apontador)
 {
-	if(apontador == NULL)
+	if (apontador == NULL)
 		printf("Lista vazia!\n");
 	else
 	{
-		while(apontador != NULL)
+		while (apontador != NULL)
 		{
-            if(apontador->tipo==1){
-			printf("Tipo=PARTIDA  Tempo=%lf\n", apontador -> tempo);
-			apontador = (lista *)apontador -> proximo;
-            }
-            else
-            {
-                printf("Tipo=CHEGADA  Tempo=%lf\n", apontador -> tempo);
-			apontador = (lista *)apontador -> proximo;
-            }
-            
+			if (apontador->tipo == 1)
+			{
+				printf("Tipo=PARTIDA  Tempo=%lf\n", apontador->tempo);
+				apontador = (lista *)apontador->proximo;
+			}
+			else
+			{
+				printf("Tipo=CHEGADA  Tempo=%lf\n", apontador->tempo);
+				apontador = (lista *)apontador->proximo;
+			}
 		}
 	}
 }
@@ -157,47 +160,46 @@ int main(void)
 	{
 		/* carrega proximo evento */
 		time_init = lista_eventos->tempo;
-        printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
+		printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
 
-        if (lista_eventos->tipo == CHEGADA) 
+		if (lista_eventos->tipo == CHEGADA)
 		{
-			if (numCanais == 0) 
-            {
-                busy = TRUE;
-                neg++;
-            } 
+			if (numCanais == 0)
+			{
+				busy = TRUE;
+				neg++;
+			}
 
-            if (numCanais > 0)
-            {
-                numCanais--;
+			if (numCanais > 0)
+			{
+				numCanais--;
 
-                if (busy == FALSE) 
-                {
-                    d = getD(dm);
-                    lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
-                }  
-            }
+				if (busy == FALSE)
+				{
+					d = getD(dm);
+					lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+				}
+			}
 
 			c = getC(lambda);
-            lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
-            cont++;
-			
-		} 
-		
-		if (lista_eventos->tipo == PARTIDA) 
+			lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
+			cont++;
+		}
+
+		if (lista_eventos->tipo == PARTIDA)
 		{
-            // liberta Canal
-			if(numCanais < aux) 
+			// liberta Canal
+			if (numCanais < aux)
 			{
 				numCanais++;
-			    busy = FALSE;
-			} 
-		} 
+				busy = FALSE;
+			}
+		}
 
 		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
 			printf("\n\nNão existem pacotes gerados!\n\n");
 
-		lista_eventos = (lista*)lista_eventos->proximo;
+		lista_eventos = (lista *)lista_eventos->proximo;
 	}
 
 	printf("\nChamadas negadas: %d\n", neg);
