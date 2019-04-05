@@ -105,7 +105,7 @@ int main(void)
 	int contador_delay = 0;
 	double estimator_delay;
 
-	double *EixoX= (double*) malloc(10000*sizeof(double));
+	double *EixoX= (double*) malloc(100000*sizeof(double));
 	int *histogramaY = (int*) malloc(100000*sizeof(int));
 
 	/*********************************************FIM INICIALIZAÇÕES************************************************/
