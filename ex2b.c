@@ -2,13 +2,64 @@
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
-#include "struct_eventos.c"
+#include <string.h>
 #include <time.h>
+#include "struct_eventos.c"
 
 #define CHEGADA 0
 #define PARTIDA 1
 #define FALSE 0
 #define TRUE 1
+
+void plotResults(double* xData, int* yData, int dataSize) {
+
+  	FILE *gnuplotPipe,*tempDataFile;
+  	char *tempDataFileName;
+  	double x;
+	int y;
+  	int i;
+  	tempDataFileName = "data.temp";
+  	gnuplotPipe = popen("gnuplot -persist ","w");
+
+
+ 	if (gnuplotPipe)
+  	{
+		char * commandsForGnuplot[] = {
+    	"set title \"Call Arrivals\"",
+    	"set xlabel \"Time(s)\"",
+    	"set ylabel \"Arrival Rate\"",
+    	"plot 'data.temp' with lines"
+		};
+
+  	tempDataFile = fopen(tempDataFileName,"w");
+
+	for (i=0; i < 4; i++)
+	{
+		fprintf(gnuplotPipe, "%s \n", commandsForGnuplot[i]);
+	}
+
+    fflush(gnuplotPipe);
+
+    for (i=0; i < dataSize; i++)
+	{
+        x = xData[i];
+      	y = yData[i];
+        fprintf(tempDataFile,"%lf %d\n",x,y);
+  	}
+
+	fclose(tempDataFile);
+	printf("press enter to continue...");
+	getchar();
+
+	fprintf(gnuplotPipe,"exit \n");
+	sleep(1);
+	remove(tempDataFileName);
+  }
+  else
+  {
+    printf("gnuplot not found...");
+  }
+}
 
 /*********************************************RETORNA VALOR DE 0 a 1********************************/
 double getRandom()
@@ -39,15 +90,13 @@ int main(void)
 	/*********************************************INICIALIZAÇÕES************************************************/
 
 	lista *lista_eventos = NULL;
-	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0;
+	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0, delta = 0.001;
 	unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
-	int numCanais = 0;
+	int numCanais = 0, aux = 0;
 	double time_init = 0.0;
 	double atraso_medio = 0.0;
 	double cont_atraso = 0.0;
-	clock_t start_delay, end_delay;
-	int aux = 0.0;
-	char busy = FALSE, flag = FALSE;
+	double start_delay, end_delay;
 	double start_delays[50000];
 	double end_delays[50000];
 	double atraso_pacotes[50000];
@@ -55,6 +104,9 @@ int main(void)
 	double delay;
 	int contador_delay = 0;
 	double estimator_delay;
+
+	double *EixoX= (double*) malloc(10000*sizeof(double));
+	int *histogramaY = (int*) malloc(100000*sizeof(int));
 
 	/*********************************************FIM INICIALIZAÇÕES************************************************/
 	printf("\nNumber of channels: ");
@@ -73,7 +125,7 @@ int main(void)
 	{
 		/* carrega proximo evento */
 		time_init = lista_eventos->tempo;
-		printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
+		//printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
 
 		if (lista_eventos->tipo == CHEGADA)
 		{
@@ -81,8 +133,8 @@ int main(void)
 			if (numCanais == 0)
 			{
 				start_delay = time_init;
-				printf("\nstart_delay: %lf", time_init);
 				start_delays[i] = (double)start_delay;
+
 				i++;
 				queue++;
 				est_queue++;
@@ -91,9 +143,11 @@ int main(void)
 			if (numCanais > 0)
 			{
 				numCanais--;
+
 				d = getD(dm);
 				lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
 			}
+
 			c = getC(lambda);
 			lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
 			cont++;
@@ -112,21 +166,20 @@ int main(void)
 				d = getD(dm);
 				queue--;
 				lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
+
 				end_delay = time_init;
-				printf("\nend_delay: %lf", time_init);
 				end_delays[j] = (double)end_delay;
 				cont_atraso += end_delays[j] - start_delays[j];
 				atraso_pacotes[j] = end_delays[j] - start_delays[j];
 
 				j++;
-				printf("\ncont atraso= %lf", cont_atraso);
 			}
 		}
 
 		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
 			printf("\n\nNão existem pacotes gerados!\n\n");
 
-		lista_eventos = (lista *)lista_eventos->proximo;
+		lista_eventos = remover (lista_eventos);
 	}
 
 	for (int i = 0; i < est_queue; i++)
@@ -134,9 +187,24 @@ int main(void)
 		if (atraso_pacotes[i] > delay)
 		{
 			contador_delay++;
-			printf("\ncont_delay= %d", contador_delay);
 		}
 	}
+
+	/*** Para o grafico *****/
+	for (int i = 0; i < cont; i++) {
+		EixoX[i] = i*delta;
+	}
+
+	for(int k=0;k<cont; k++)
+	{
+		for(int j=0;j<cont;j++)
+		{
+			if(atraso_pacotes[k] >= EixoX[j] && atraso_pacotes[k] < EixoX[j+1])
+				histogramaY[j]++;
+		}
+	}
+	/***** Grafico *****/
+
 	printf("\n\n\t\t***************RESULTADOS*******************\n");
 	printf("\nChamadas na fila: %d", queue);
 	printf("\nChamadas que entraram na fila: %d", est_queue);
@@ -145,7 +213,12 @@ int main(void)
 	printf("\nDelay probability: %lf", prob);
 	atraso_medio = (cont_atraso / cont);
 	printf("\nAtraso medio de todos os pacotes : %lf (s)", atraso_medio);
-	estimator_delay = (double)(contador_delay / (double)cont) * 100.0;
-	printf("\nProbabilidade de ser maior do que %lf (s) é  : %lf % \n", delay, estimator_delay);
+	estimator_delay = ((double)(contador_delay/(double)cont)) * 100.0;
+	printf("\nProbabilidade de ser maior do que %lf (s) é  : %lf \n", delay, estimator_delay);
+
+	imprimir(lista_eventos);
+
+	plotResults(EixoX,histogramaY,time_simulation);
+
 	return 0;
 }
