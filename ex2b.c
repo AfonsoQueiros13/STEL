@@ -48,9 +48,6 @@ void plotResults(double* xData, int* yData, int dataSize) {
   	}
 
 	fclose(tempDataFile);
-	printf("press enter to continue...");
-	getchar();
-
 	fprintf(gnuplotPipe,"exit \n");
 	sleep(1);
 	remove(tempDataFileName);
@@ -64,7 +61,7 @@ void plotResults(double* xData, int* yData, int dataSize) {
 /*********************************************RETORNA VALOR DE 0 a 1********************************/
 double getRandom()
 {
-	double u = (double)random() / (RAND_MAX); //calculo de u
+	double u = (double)rand() / (RAND_MAX); //calculo de u
 	return u;
 }
 /*********************************************RETORNA C***************************************/
@@ -88,9 +85,9 @@ double getD(double dm)
 int main(void)
 {
 	/*********************************************INICIALIZAÇÕES************************************************/
-
+  srand(time(NULL));
 	lista *lista_eventos = NULL;
-	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0, delta = 0.001;
+	double time_simulation = 0.0, c = 0.0, lambda = 200.0, dm = 0.008, d = 0.0, prob = 0.0, delta = 0.01;
 	unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
 	int numCanais = 0, aux = 0;
 	double time_init = 0.0;
@@ -218,7 +215,7 @@ int main(void)
 
 	imprimir(lista_eventos);
 
-	plotResults(EixoX,histogramaY,time_simulation);
+	plotResults(EixoX,histogramaY,time_simulation/1.5);
 
 	return 0;
 }
