@@ -18,7 +18,7 @@ double getGaussRandomNumbers() { //funcao que gera numeros gaussianos random
     double u = ((double) rand() / (RAND_MAX)) * 2 - 1;
     double v = ((double) rand() / (RAND_MAX)) * 2 - 1;
     double r = u * u + v * v;
-    if (r == 0 || r > 1) return sampleNormal();
+    if (r == 0 || r > 1) return getGaussRandomNumbers();
     double c = sqrt(-2 * log(r) / r);
     return u * c;
 }
