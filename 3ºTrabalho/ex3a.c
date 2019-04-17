@@ -21,6 +21,7 @@
 #define SPECIFIC_QUEUE 20000 //tamanho maximo da fila especifica
 #define GAUSSMED 60 //media da distribuicao gaussiana
 #define GAUSSDESVIO 20 //desvio da distribuicao gaussiana
+#define UMSEGUNDO 60
 
 /******************************FUNCOES USADAS NA MAIN*******************************************/
 double rand_normal(double mean, double stddev)
@@ -91,7 +92,7 @@ void main(){
     lista *lista_eventos = NULL;
     double time_simulation = 0.0, c = 0.0, d = 0.0, prob = 0.0;
     unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
-    int numCanais = 0;
+    int numCanais = 2; // (mudar depois)
     double time_init = 0.0;
     double atraso_medio = 0.0;
     double cont_atraso = 0.0;
@@ -118,21 +119,61 @@ void main(){
         character = getchar();
     } while (character != '\n' && character != EOF);
     
-   /* printf("\n Simulation Time (s): "); //tempo de simulacao do programa
+    /*printf("\nNumber of channels: ");
+	scanf("%d", &numCanais);*/
+	aux = numCanais;
+    printf("\n Simulation Time (s): "); //tempo de simulacao do programa
 	scanf("%lf", &time_simulation);
-    printf("\nGeral Queue (units): ");
+    /*printf("\nGeral Queue (units): ");
     scanf("%d",&geral_queue);*/
+    
     
     
     /*****************Inicio de  chegada de chamadas a 0.0 segundos*******************************/
 
-	while (1)
+	lista_eventos = adicionar(lista_eventos, CHEGADA, 0.0); //primeira chamada aos 0 segundos
+	while (time_init < time_simulation)
 	{
-        sleep(1);
 		/* carrega proximo evento */
-		double random_gauss= rand_normal(GAUSSMED,GAUSSDESVIO);
-        printf("\nnum_geral -> %lf",random_gauss/60.0);
-       
-		
-    }
+		time_init = lista_eventos->tempo;
+		printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
+
+		if (lista_eventos->tipo == CHEGADA)
+		{
+			random = getRandom();
+
+            if(random < 0.3){   //chamada GERAL!! 
+                if (numCanais > 0)
+			{
+				    numCanais--;
+				    d = getDGeral(DMGERAL);
+                    if(d+60>300) //se a chamada demora mais do que 5min
+				        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+300);
+                    else
+                    {
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+UMSEGUNDO+d);
+                    }
+                    
+			}
+                c = getC(LAMBDA);
+			    lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
+
+            }   
+		}
+
+		if (lista_eventos->tipo == PARTIDA)
+		{
+			// liberta Canal
+			if (numCanais < aux)
+			{
+				numCanais++;
+			}
+		}
+
+		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
+			printf("\n\nNão existem pacotes gerados!\n\n");
+
+		lista_eventos = (lista *)lista_eventos->proximo;
+	}
+    imprimir(lista_eventos);
 }
