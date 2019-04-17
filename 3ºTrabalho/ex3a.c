@@ -5,28 +5,57 @@
 #include <unistd.h>
 #include "struct_eventos.c"
 #include <time.h>
-/******************************DEFINICOES DE ALGUMAS VARIAVEIS BOLEANAS************************/
+/******************************DEFINICOES DE ALGUMAS VARIAVEIS************************/
 #define CHEGADA 0
 #define PARTIDA 1
 #define FALSE 0
 #define TRUE 1
-#define LAMBDA 80.0
-#define DM 0.008
-#define SPECIFIC_QUEUE 20000
+#define LAMBDA 0.02 // 0.02 chamadas/s 
+#define DMGERAL 120 //duracao media da chamada geral
+#define DMSPEC  150 //duracao media da chamada especifica
+#define DGERALMIN 60  //duracao minima da chamada geral
+#define DGERALMAX 300 //duracao maxima da chamada geral
+#define DSPECMIN 30  //duracao minima da chamada especifica
+#define DSPECMAX 120 //duracao maxuma da chamada especifica
+#define GERAL_QUEUE 50
+#define SPECIFIC_QUEUE 20000 //tamanho maximo da fila especifica
+#define GAUSSMED 60 //media da distribuicao gaussiana
+#define GAUSSDESVIO 20 //desvio da distribuicao gaussiana
+
 /******************************FUNCOES USADAS NA MAIN*******************************************/
-double getGaussRandomNumbers() { //funcao que gera numeros gaussianos random
-    double u = ((double) rand() / (RAND_MAX)) * 2 - 1;
-    double v = ((double) rand() / (RAND_MAX)) * 2 - 1;
-    double r = u * u + v * v;
-    if (r == 0 || r > 1) return getGaussRandomNumbers();
-    double c = sqrt(-2 * log(r) / r);
-    return u * c;
+double rand_normal(double mean, double stddev)
+{//Box muller method
+    static double n2 = 0.0;
+    static int n2_cached = 0;
+    if (!n2_cached)
+    {
+        double x, y, r;
+        do
+        {
+            x = 2.0*rand()/RAND_MAX - 1;
+            y = 2.0*rand()/RAND_MAX - 1;
+
+            r = x*x + y*y;
+        }
+        while (r == 0.0 || r > 1.0);
+        {
+            double d = sqrt(-2.0*log(r)/r);
+            double n1 = x*d;
+            n2 = y*d;
+            double result = n1*stddev + mean;
+            n2_cached = 1;
+            return result;
+        }
+    }
+    else
+    {
+        n2_cached = 0;
+        return n2*stddev + mean;
+    }
 }
 double approxRollingAverage (double avg, double new_sample,int cont) { //atualiza a media
-
     avg -= avg / cont;
     avg += new_sample / cont;
-
     return avg;
 }
 double getRandom() //retorna numero de 0 a 1
@@ -41,13 +70,21 @@ double getC(double lambda) //retorna c (chegada de uma chamada apartir do tempo 
     c = (-1 / LAMBDA) * log(getRandom());
     return c;
 }
-double getD(double dm) //retorna d(partida de uma chamada apartir do tempo atual)
+
+
+double getDGeral(double dm) //retorna c (chegada de uma chamada apartir do tempo atual)
 {
-    double d = 0;
-    d = (-DM) * log(getRandom());
-    return d;
+    double c = 0;
+    c = (-dm) * log(getRandom());
+    return c;
 }
 
+double getDSpec(double dm) //retorna c (chegada de uma chamada apartir do tempo atual)
+{
+    double c = 0;
+    c = (-dm) * log(getRandom());
+    return c;
+}
 void main(){
     /**************************************INICIALIZAÇÕES****************************************/
     srand(time(NULL)); //gerar semetes diferentes sempre que se corre o programa
@@ -81,72 +118,21 @@ void main(){
         character = getchar();
     } while (character != '\n' && character != EOF);
     
-    printf("\n Simulation Time (s): "); //tempo de simulacao do programa
+   /* printf("\n Simulation Time (s): "); //tempo de simulacao do programa
 	scanf("%lf", &time_simulation);
     printf("\nGeral Queue (units): ");
-    scanf("%d",&geral_queue);
+    scanf("%d",&geral_queue);*/
     
     
     /*****************Inicio de  chegada de chamadas a 0.0 segundos*******************************/
-	lista_eventos = adicionar(lista_eventos, CHEGADA, 0.0);
-	while (time_init < time_simulation)
+
+	while (1)
 	{
+        sleep(1);
 		/* carrega proximo evento */
-		time_init = lista_eventos->tempo;
-		printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
-
-		if (lista_eventos->tipo == CHEGADA)
-		{
-            sleep(1);
-            //aqui a chamada será sempre atendida pelo atendimento geral
-            //a chamada tem 0.7 de probabilidade de ser especifica e 0.3 de ser geral
-            random = getRandom(); //variavel que decide se a chamada e geral ou especifica
-            if(random < 0.3)
-            {
-                //chamada geral
-            }
-            else
-            {
-                //chamada especifica
-            }
-            
-			if (numCanais == 0)
-			{
-				busy = TRUE;
-				neg++;
-			}
-
-			if (numCanais > 0)
-			{
-				numCanais--;
-
-				if (busy == FALSE)
-				{
-					d = getD(DM);
-					lista_eventos = adicionar(lista_eventos, PARTIDA, time_init + d);
-				}
-			}
-
-			c = getC(LAMBDA);
-			lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
-			cont++;
-		}
-
-		if (lista_eventos->tipo == PARTIDA)
-		{
-			// liberta Canal
-			if (numCanais < aux)
-			{
-				numCanais++;
-				busy = FALSE;
-			}
-		}
-
-		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
-			printf("\n\nNão existem pacotes gerados!\n\n");
-
-		lista_eventos = (lista *)lista_eventos->proximo;
-	}
-
-
+		double random_gauss= rand_normal(GAUSSMED,GAUSSDESVIO);
+        printf("\nnum_geral -> %lf",random_gauss/60.0);
+       
+		
+    }
 }
