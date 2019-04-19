@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
-void plotResults(double* xData, int* yData, int dataSize) {
+void plotResultsDelay(double* xData, int* yData, int dataSize) {
   	FILE *gnuplotPipe,*tempDataFile;
   	char *tempDataFileName;
   	double x;
@@ -17,9 +17,9 @@ void plotResults(double* xData, int* yData, int dataSize) {
  	if (gnuplotPipe)
   	{
 		char * commandsForGnuplot[] = {
-    	"set title \"Call Arrivals\"",
-    	"set xlabel \"Time(s)\"",
-    	"set ylabel \"Arrival Rate\"",
+    	"set title \"Delay Histogram\"",
+    	"set xlabel \"Calls\"",
+    	"set ylabel \"Delay(s)\"",
     	"plot 'data.temp' with lines"
 		};
 
