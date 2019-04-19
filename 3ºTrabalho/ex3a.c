@@ -3,9 +3,18 @@
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
-#include "struct_eventos.c" //lista ligada 
+#include "struct_eventos.h" //lista ligada 
 #include <time.h>
+#include "gnuplot.h"
 /******************************DEFINICOES DE ALGUMAS VARIAVEIS************************/
+#define KRED  "\x1B[31m" 
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+#define RESET "\x1B[0m" //cores do texto do terminal
 #define CHEGADA 0
 #define PARTIDA 1
 #define FALSE 0
@@ -17,7 +26,7 @@
 #define DGERALMAX 300 //duracao maxima da chamada geral
 #define DSPECMIN 30  //duracao minima da chamada especifica
 #define DSPECMAX 120 //duracao maxuma da chamada especifica
-#define GERAL_QUEUE 50
+#define GERAL_QUEUE 2
 #define SPECIFIC_QUEUE 20000 //tamanho maximo da fila especifica
 #define GAUSSMED 60 //media da distribuicao gaussiana
 #define GAUSSDESVIO 20 //desvio da distribuicao gaussiana
@@ -73,18 +82,18 @@ double getC(double lambda) //retorna c (chegada de uma chamada apartir do tempo 
 }
 
 
-double getDGeral(double dm) //retorna c (chegada de uma chamada apartir do tempo atual)
+double getDGeral(double dm) //retorna d (partida de uma chamada apartir do tempo atual)
 {
-    double c = 0;
-    c = (-dm) * log(getRandom());
-    return c;
+    double d = 0;
+    d = (-dm) * log(getRandom());
+    return d;
 }
 
-double getDSpec(double dm) //retorna c (chegada de uma chamada apartir do tempo atual)
+double getDSpec(double dm) //retorna c (partida de uma chamada apartir do tempo atual)
 {
-    double c = 0;
-    c = (-dm) * log(getRandom());
-    return c;
+    double d = 0;
+    d = (-dm) * log(getRandom());
+    return d;
 }
 void main(){
     /**************************************INICIALIZAÇÕES****************************************/
@@ -93,12 +102,14 @@ void main(){
     double time_simulation, c = 0.0, d = 0.0, prob = 0.0;
     unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
     int numCanais = 2; // (mudar depois)
-    double time_init = 0.0;
+    double actual_sym_time = 0.0;
+    double delta=0.1;
     double atraso_medio = 0.0;
     double cont_atraso = 0.0;
     clock_t start_delay, end_delay;
     int aux = 0;
     char busy = FALSE;
+    char geral=0;
     double start_delays[50000];
     double end_delays[50000];
     double atraso_pacotes[50000];
@@ -106,51 +117,48 @@ void main(){
     double delay;
     int contador_delay = 0;
     double estimator_delay;
-    int queue_max;
     int packet_loss = 0;
     int neg = 0;
-    char character;
+    char enter,exit;
     double random;
     int geral_queue;
-    char percentagem = 37; //apenas o simbolo "%" em ascii code para apresentação na area dos res.
+    char percentagem = 37; //apenas o simbolo "%" em ascii code para apresentação na area dos res.    
+	double *EixoX= (double*) malloc(100000*sizeof(double));
+	int *histogramaY = (int*) malloc(100000*sizeof(int));
+
     /************************INTERACAO COM O UTILIZADOR(INSERCAO DE DADOS)**********************/
-    printf("\n\tWELCOME TO CALL CENTER SIMULATOR (PRESS ENTER TO CONTINUE)...\n");
+    printf("\n\t%sWELCOME TO CALL CENTER SIMULATOR (PRESS ENTER TO CONTINUE)... \n",KYEL);
     do 
     {
-        character = getchar();
-    } while (character != '\n' && character != EOF);
+        enter = getchar();
+    } while (enter != '\n' && enter != EOF);
     
     /*printf("\nNumber of channels: ");
 	scanf("%d", &numCanais);*/
 	aux = numCanais;
-    printf("\n Simulation Time (s): "); //tempo de simulacao do programa
-	scanf("%lf", &time_simulation);
+    printf("\n%sSimulation Time (s): ",KMAG); //tempo de simulacao do programa
+	scanf("%lf",&time_simulation);
+    printf("%s",RESET);
     /*****************Inicio de  chegada de chamadas a 0.0 segundos*******************************/
 	lista_eventos = adicionar(lista_eventos, CHEGADA, 0.0); //primeira chamada aos 0 segundos
-	while (time_init < time_simulation)
+	while (actual_sym_time < time_simulation)
 	{
 		/* carrega proximo evento */
-		time_init = lista_eventos->tempo;
-        if(lista_eventos->tipo==0)
-		    printf("\n\n\nEvento do tipo: CHEGADA -- No tempo: %lf",lista_eventos->tempo);
-        if(lista_eventos->tipo==1)
-		    printf("\n\n\nEvento do tipo: PARTIDA -- No tempo: %lf",lista_eventos->tempo);
+		actual_sym_time = lista_eventos->tempo;
 		if (lista_eventos->tipo == CHEGADA)
 		{
 			random = getRandom(); //variavel que vai checkar se a chamada é egral ou especifica
-
             if(random < 0.3){   //chamada só GERAL!! 
+                geral=1;
                 if (numCanais == 0 && queue < GERAL_QUEUE)
 			    {
-				    start_delay = time_init;
+				    start_delay = actual_sym_time;
 				    start_delays[i] = (double)start_delay;
-
 				    i++;
 				    queue++;
 				    est_queue++;
 			}
-                
-                if (queue == queue_max)
+                if (queue == GERAL_QUEUE)
                 {
                     packet_loss++;
                 }
@@ -160,52 +168,79 @@ void main(){
 				    numCanais--;
 				    d = getDGeral(DMGERAL);
                     if(d+60>300) //se a chamada demora mais do que 5min
-				        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+300);
+                    {
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+300);
+                    }
                     else
-                        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+UMSEGUNDO+d);
-                    
+                    {
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+UMSEGUNDO+d);
+
+                    }    
 			}
                 c = getC(LAMBDA);
-			    lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
+			    lista_eventos = adicionar(lista_eventos, CHEGADA, actual_sym_time + c);
                 
             }
             else //chamada ESPECIFICA!!!
             {
-                /* code */
+                geral=0;
             }
             cont++; 
 		}
 
 		if (lista_eventos->tipo == PARTIDA)
 		{
-			// liberta Canal
-			if (numCanais < aux && queue == 0)
-			{
-				numCanais++; // so quando queue=0!
-			}
+            if(geral==1){
+			    if (numCanais < aux && queue == 0)
+			    {
+				    numCanais++; // so quando queue=0!
+			    }
 
-			if (queue > 0)
-			{
-				d = getDGeral(DMGERAL);
-				queue--;
-				if(d+60>300) //se a chamada demora mais do que 5min
-				        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+300);
+			    if (queue > 0)
+			    {
+				    d = getDGeral(DMGERAL);
+				    queue--;
+				    if(d+60>300) //se a chamada demora mais do que 5min
+				        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+300);
                     else
-                        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+UMSEGUNDO+d);
-				end_delay = time_init;
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+UMSEGUNDO+d);
+				end_delay = actual_sym_time;
 				end_delays[j] = (double)end_delay;
 				cont_atraso += end_delays[j] - start_delays[j];
 				atraso_pacotes[j] = end_delays[j] - start_delays[j];
 				j++;
-			}
+			    }
+            }
 		}
 
 		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
 			printf("\n\n\t\tNO PACKETS TO ANALYSE! \n\n");
-
-		lista_eventos = remover (lista_eventos);
+        if(geral==1)
+		    lista_eventos = (lista *)lista_eventos->proximo;
 	}
+    /**********************FIM DO PROCESSO DE ANALISE DE CHAMADAS**********************************/
+   /*** Para o grafico *****/
+	for (int i = 0; i < cont; i++) {
+		EixoX[i] = i*delta;
+	}
+
+	for(int k=0;k<cont; k++)
+	{
+		for(int j=0;j<cont;j++)
+		{
+			if(atraso_pacotes[k] >= EixoX[j] && atraso_pacotes[k] < EixoX[j+1])
+				histogramaY[j]++;
+		}
+	}
+	/***** Grafico *****/
     printf("\n\n\t\tCALL CENTER STATISTICS\n");
-    printf("\nProbability that a call is delayed: %lf %c ", ((double)est_queue/(double)cont)*100,percentagem);
-	printf("\nProbability that a call is lost: %lf %c ", ((double)packet_loss/(double)cont)*100,percentagem);
+    printf("\nNUMBER OF EMPLOYEES(SERVERS) IN CALL CENTER : %d",aux);
+    printf("\nGENERAL-PURPOSE-CALLS QUEUE SIZE : %d",GERAL_QUEUE);
+    printf("\nPROBABILITY THAT A CALL IS DELAYED: %lf %c ", ((double)est_queue/(double)cont)*100,percentagem);
+	printf("\nPROBABILITY THAT A CALL IS LOSTED: %lf %c ", ((double)packet_loss/(double)cont)*100,percentagem);
+	atraso_medio = (cont_atraso / cont);
+    printf("\nAVERAGE DELAY OF CALLS THAT SUFFERS DELAY: %lf s\n",atraso_medio);
+    plotResults(EixoX,histogramaY,time_simulation);
+
+
 }

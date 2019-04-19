@@ -1,6 +1,4 @@
 
-
-
 // Defini��o da estrutura da lista
 typedef struct{
 	int tipo;
