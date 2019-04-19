@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
-#include "struct_eventos.c"
+#include "struct_eventos.c" //lista ligada 
 #include <time.h>
 /******************************DEFINICOES DE ALGUMAS VARIAVEIS************************/
 #define CHEGADA 0
@@ -90,7 +90,7 @@ void main(){
     /**************************************INICIALIZAÇÕES****************************************/
     srand(time(NULL)); //gerar semetes diferentes sempre que se corre o programa
     lista *lista_eventos = NULL;
-    double time_simulation = 0.0, c = 0.0, d = 0.0, prob = 0.0;
+    double time_simulation, c = 0.0, d = 0.0, prob = 0.0;
     unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
     int numCanais = 2; // (mudar depois)
     double time_init = 0.0;
@@ -112,8 +112,9 @@ void main(){
     char character;
     double random;
     int geral_queue;
+    char percentagem = 37; //apenas o simbolo "%" em ascii code para apresentação na area dos res.
     /************************INTERACAO COM O UTILIZADOR(INSERCAO DE DADOS)**********************/
-    printf("\n\tWelcome to Call Center System Simulator (PRESS ENTER TO CONTINUE)...\n");
+    printf("\n\tWELCOME TO CALL CENTER SIMULATOR (PRESS ENTER TO CONTINUE)...\n");
     do 
     {
         character = getchar();
@@ -124,25 +125,36 @@ void main(){
 	aux = numCanais;
     printf("\n Simulation Time (s): "); //tempo de simulacao do programa
 	scanf("%lf", &time_simulation);
-    /*printf("\nGeral Queue (units): ");
-    scanf("%d",&geral_queue);*/
-    
-    
-    
     /*****************Inicio de  chegada de chamadas a 0.0 segundos*******************************/
-
 	lista_eventos = adicionar(lista_eventos, CHEGADA, 0.0); //primeira chamada aos 0 segundos
 	while (time_init < time_simulation)
 	{
 		/* carrega proximo evento */
 		time_init = lista_eventos->tempo;
-		printf("\n\n\nEvento do tipo: %d -- No tempo: %lf", lista_eventos->tipo, lista_eventos->tempo);
-
+        if(lista_eventos->tipo==0)
+		    printf("\n\n\nEvento do tipo: CHEGADA -- No tempo: %lf",lista_eventos->tempo);
+        if(lista_eventos->tipo==1)
+		    printf("\n\n\nEvento do tipo: PARTIDA -- No tempo: %lf",lista_eventos->tempo);
 		if (lista_eventos->tipo == CHEGADA)
 		{
-			random = getRandom();
+			random = getRandom(); //variavel que vai checkar se a chamada é egral ou especifica
 
-            if(random < 0.3){   //chamada GERAL!! 
+            if(random < 0.3){   //chamada só GERAL!! 
+                if (numCanais == 0 && queue < GERAL_QUEUE)
+			    {
+				    start_delay = time_init;
+				    start_delays[i] = (double)start_delay;
+
+				    i++;
+				    queue++;
+				    est_queue++;
+			}
+                
+                if (queue == queue_max)
+                {
+                    packet_loss++;
+                }
+
                 if (numCanais > 0)
 			{
 				    numCanais--;
@@ -150,30 +162,50 @@ void main(){
                     if(d+60>300) //se a chamada demora mais do que 5min
 				        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+300);
                     else
-                    {
                         lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+UMSEGUNDO+d);
-                    }
                     
 			}
                 c = getC(LAMBDA);
 			    lista_eventos = adicionar(lista_eventos, CHEGADA, time_init + c);
-
-            }   
+                
+            }
+            else //chamada ESPECIFICA!!!
+            {
+                /* code */
+            }
+            cont++; 
 		}
 
 		if (lista_eventos->tipo == PARTIDA)
 		{
 			// liberta Canal
-			if (numCanais < aux)
+			if (numCanais < aux && queue == 0)
 			{
-				numCanais++;
+				numCanais++; // so quando queue=0!
+			}
+
+			if (queue > 0)
+			{
+				d = getDGeral(DMGERAL);
+				queue--;
+				if(d+60>300) //se a chamada demora mais do que 5min
+				        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+300);
+                    else
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, time_init+UMSEGUNDO+d);
+				end_delay = time_init;
+				end_delays[j] = (double)end_delay;
+				cont_atraso += end_delays[j] - start_delays[j];
+				atraso_pacotes[j] = end_delays[j] - start_delays[j];
+				j++;
 			}
 		}
 
 		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
-			printf("\n\nNão existem pacotes gerados!\n\n");
+			printf("\n\n\t\tNO PACKETS TO ANALYSE! \n\n");
 
-		lista_eventos = (lista *)lista_eventos->proximo;
+		lista_eventos = remover (lista_eventos);
 	}
-    imprimir(lista_eventos);
+    printf("\n\n\t\tCALL CENTER STATISTICS\n");
+    printf("\nProbability that a call is delayed: %lf %c ", ((double)est_queue/(double)cont)*100,percentagem);
+	printf("\nProbability that a call is lost: %lf %c ", ((double)packet_loss/(double)cont)*100,percentagem);
 }
