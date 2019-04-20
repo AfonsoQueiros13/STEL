@@ -76,13 +76,13 @@ void main(){
 			{
 				    numCanais--;
 				    d = getDGeral(DMGERAL);
-                    if(d+UMMINUTO>DGERALMAX) //se a chamada demora mais do que 5min
+                    if(d+DGERALMIN>DGERALMAX) //se a chamada demora mais do que 5min
                     {
                         lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+300);
                     }
                     else
                     {
-                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+UMMINUTO+d);
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+DGERALMIN+d);
 
                     }    
 			}
@@ -109,10 +109,10 @@ void main(){
 			    {
 				    d = getDGeral(DMGERAL);
 				    queue--;
-				    if(d+UMMINUTO>DGERALMAX) //se a chamada demora mais do que 5min
+				    if(d+DGERALMIN>DGERALMAX) //se a chamada demora mais do que 5min
 				        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+300);
                     else
-                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+UMMINUTO+d);
+                        lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+DGERALMIN+d);
 				end_delay = actual_sym_time;
 				end_delays[j] = (double)end_delay;
 				cont_atraso += end_delays[j] - start_delays[j];
