@@ -10,7 +10,7 @@ void plotResultsDelay(double* xData, int* yData, int dataSize) {
   	double x;
 	int y;
   	int i;
-  	tempDataFileName = "data.temp";
+  	tempDataFileName = "histogram_delay.temp";
   	gnuplotPipe = popen("gnuplot -persist ","w");
 
 
@@ -18,9 +18,9 @@ void plotResultsDelay(double* xData, int* yData, int dataSize) {
   	{
 		char * commandsForGnuplot[] = {
     	"set title \"Delay Histogram\"",
-    	"set xlabel \"Calls\"",
-    	"set ylabel \"Delay(s)\"",
-    	"plot 'data.temp' with lines"
+    	"set xlabel \"Delay(s)\"",
+    	"set ylabel \"Number of Calls\"",
+    	"plot 'histogram_delay.temp' with lines"
 		};
 
   	tempDataFile = fopen(tempDataFileName,"w");

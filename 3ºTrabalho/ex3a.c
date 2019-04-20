@@ -12,8 +12,13 @@ void main(){
     srand(time(NULL)); //gerar semetes diferentes sempre que se corre o programa
     lista *lista_eventos = NULL;
     double time_simulation, c = 0.0, d = 0.0, prob = 0.0;
+    double duracao_chamada[50000]={0};
+    double inicio_chamada[50000]={0};
+    double fim_chamada[50000]={0};
+    double avg_waiting_time=0;
+    int a=0;
     unsigned int n = 0, cont = 0, queue = 0, est_queue = 0;
-    int numCanais = 2; // (mudar depois)
+    int numCanais = 5; // (mudar depois)
     double actual_sym_time = 0.0;
     double delta=1;
     double atraso_medio = 0.0;
@@ -71,9 +76,9 @@ void main(){
                 {
                     packet_loss++;
                 }
-
                 if (numCanais > 0)
-			{
+			    {
+                    inicio_chamada[a]= actual_sym_time;
 				    numCanais--;
 				    d = getDGeral(DMGERAL);
                     if(d+DGERALMIN>DGERALMAX) //se a chamada demora mais do que 5min
@@ -83,12 +88,10 @@ void main(){
                     else
                     {
                         lista_eventos = adicionar(lista_eventos, PARTIDA, actual_sym_time+DGERALMIN+d);
-
                     }    
-			}
+			    }
                 c = getC(LAMBDA);
-			    lista_eventos = adicionar(lista_eventos, CHEGADA, actual_sym_time + c);
-                
+			    lista_eventos = adicionar(lista_eventos, CHEGADA, actual_sym_time + c);  
             }
             else //chamada ESPECIFICA!!!
             {
@@ -96,15 +99,16 @@ void main(){
             }
             cont++; 
 		}
-
 		if (lista_eventos->tipo == PARTIDA)
 		{
             if(geral==1){
 			    if (numCanais < aux && queue == 0)
 			    {
+                    fim_chamada[a]= actual_sym_time;
+                    duracao_chamada[a]= fim_chamada[a]-inicio_chamada[a];
+                    a++;
 				    numCanais++; // so quando queue=0!
 			    }
-
 			    if (queue > 0)
 			    {
 				    d = getDGeral(DMGERAL);
@@ -121,7 +125,6 @@ void main(){
 			    }
             }
 		}
-
 		if (lista_eventos->tipo != PARTIDA && lista_eventos->tipo != CHEGADA)
 			printf("\n\n\t\tNO PACKETS TO ANALYSE! \n\n");
         if(geral==1)
@@ -130,24 +133,32 @@ void main(){
    /**********************CONSTRUCAO DO HISTOGRAMA DE DELAYS***************************************/
 	for (int i = 0; i < cont; i++) {
 		EixoX[i] = i*delta;
-        printf("\natraso[%d] -> %lf",i,atraso_pacotes[i]);
+        
 	}
-	for(int k=0;k<cont; k++)
+	for(int k=0;k<est_queue; k++)
 	{
+        printf("\natraso[%d] -> %lf",k,atraso_pacotes[k]);
 		for(int j=0;j<cont;j++)
 		{
 			if(atraso_pacotes[k] >= EixoX[j] && atraso_pacotes[k] < EixoX[j+1])
 				histogramaY[j]++;
 		}
 	}
+
+    for (int i = 0; i < cont; i++) {
+        printf("\nwaiting time of call %d -> %lf",i,duracao_chamada[i]);
+		avg_waiting_time = approxRollingAverage(avg_waiting_time,duracao_chamada[i],cont);
+	}
+
     printf("\n\n\t\tCALL CENTER STATISTICS\n");
     printf("\nNUMBER OF EMPLOYEES(SERVERS) IN CALL CENTER : %d",aux);
     printf("\nGENERAL-PURPOSE-CALLS QUEUE SIZE : %d",GERAL_QUEUE);
     printf("\nPROBABILITY THAT A CALL IS DELAYED: %lf %c ", ((double)est_queue/(double)cont)*100,percentagem);
 	printf("\nPROBABILITY THAT A CALL IS LOSTED: %lf %c ", ((double)packet_loss/(double)cont)*100,percentagem);
-	atraso_medio = (cont_atraso / cont);
-    printf("\nAVERAGE DELAY OF CALLS THAT SUFFERS DELAY: %lf s\n",atraso_medio);
-    plotResultsDelay(EixoX,histogramaY,40);
+	atraso_medio = ((double)cont_atraso / (double)est_queue);
+    printf("\nAVERAGE DELAY OF CALLS THAT SUFFERS DELAY: %lf s",atraso_medio);
+    printf("\nAVERAGE WAITING TIME IN QUEUE: %lf s\n",avg_waiting_time);
+    //plotResultsDelay(EixoX,histogramaY,300);
 
 
 }
