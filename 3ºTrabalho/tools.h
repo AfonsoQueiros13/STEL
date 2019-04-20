@@ -23,7 +23,7 @@
 #define SPECIFIC_QUEUE 20000 //tamanho maximo da fila especifica
 #define GAUSSMED 60 //media da distribuicao gaussiana
 #define GAUSSDESVIO 20 //desvio da distribuicao gaussiana
-#define UMSEGUNDO 60
+#define UMMINUTO 60
 /******************************FUNCOES USADAS NA MAIN*******************************************/
 double rand_normal(double mean, double stddev)
 {//Box muller method
