@@ -10,8 +10,6 @@
 #define RESET "\x1B[0m" //cores do texto do terminal
 #define CHEGADA 0
 #define PARTIDA 1
-#define FALSE 0
-#define TRUE 1
 #define LAMBDA 0.02 // 0.02 chamadas/s 
 #define DMGERAL 120 //duracao media da chamada geral
 #define DMSPEC  150 //duracao media da chamada especifica
@@ -19,11 +17,15 @@
 #define DGERALMAX 300 //duracao maxima da chamada geral
 #define DSPECMIN 30  //duracao minima da chamada especifica
 #define DSPECMAX 120 //duracao maxuma da chamada especifica
-#define GERAL_QUEUE 2
 #define SPECIFIC_QUEUE 20000 //tamanho maximo da fila especifica
 #define GAUSSMED 60 //media da distribuicao gaussiana
 #define GAUSSDESVIO 20 //desvio da distribuicao gaussiana
-#define UMMINUTO 60
+
+// Para alterar //
+#define TIME 3600*7*24
+#define GERAL_QUEUE 6
+#define OPERADORESGP 4
+#define OPERADORESAS 2
 /******************************FUNCOES USADAS NA MAIN*******************************************/
 double rand_normal(double mean, double stddev)
 {//Box muller method
