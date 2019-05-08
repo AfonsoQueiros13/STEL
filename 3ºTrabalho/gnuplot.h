@@ -65,7 +65,7 @@ void plotResultsAVGWT(double* xData, int* yData, int dataSize) {
 		char * commandsForGnuplot[] = {
     	"set title \"AVG Waiting Time\"",
     	"set xlabel \" Time(s)\"",
-    	"set ylabel \"Number of Calls\"",
+    	"set ylabel \" Running Time(s)\"",
     	"plot 'histogram_avg.temp' with lines"
 		};
 

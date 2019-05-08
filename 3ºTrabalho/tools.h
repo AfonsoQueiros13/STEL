@@ -22,9 +22,9 @@
 #define GAUSSDESVIO 20 //desvio da distribuicao gaussiana
 
 // Para alterar //
-#define TIME 3600*7*24
-#define GERAL_QUEUE 6
-#define OPERADORESGP 4
+#define TIME 200000
+#define GERAL_QUEUE 3
+#define OPERADORESGP 3
 #define OPERADORESAS 2
 /******************************FUNCOES USADAS NA MAIN*******************************************/
 double rand_normal(double mean, double stddev)
