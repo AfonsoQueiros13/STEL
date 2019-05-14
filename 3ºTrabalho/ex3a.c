@@ -407,7 +407,19 @@ void main()
     printf("\nThe average time between the arrival of a call to the general-purpose and the call answering by the area-specific: %lf\n", atraso_medio_AS);
     printf("ABSOLUTE ERROR = %lf  s ",erro_absoluto);
     printf("RELATIVE ERROR = %lf   %c ",fabs(erro_relativo),percentagem);
-    plotResultsDelay(EixoX,histogramaY,1000);
+    double estimator_vmedio= avg_waiting_time;
+    double estimator_desvio=0.0;
+    for(int i=0;i<j;i++){
+        estimator_desvio +=(atraso_pacotes[i]-estimator_vmedio)*((atraso_pacotes[i]-estimator_vmedio));
+        //printf("\nestimator_desvio=  %lf",estimator_desvio);
+    }
+    estimator_desvio = sqrt(estimator_desvio/(j-1));
+    printf("estimator_desvio=  %lf",estimator_desvio);
+    double estimator_padrao= estimator_desvio/sqrt(j);
+    double icsup= estimator_vmedio + 1.65+estimator_padrao;
+    double icinf= estimator_vmedio - 1.65+estimator_padrao;
+    printf("\nIC £[%lf, %lf]\n",icinf,icsup);
+   // plotResultsDelay(EixoX,histogramaY,1000);
     //histograma do valor (avg_waiting_time - atraso_medio)
-    plotResultsAVGWT(EixoX,histogramaY1,10000);
+   // plotResultsAVGWT(EixoX,histogramaY1,10000);
 }
